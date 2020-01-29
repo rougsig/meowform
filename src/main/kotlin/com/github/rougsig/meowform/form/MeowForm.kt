@@ -9,11 +9,17 @@ class MeowForm<T : Any>(
   private val validator: Validator<T>,
   private val onSubmit: (T) -> Unit
 ) {
-  val touched: TouchedValues<T> = TouchedValues()
-  val values: FormValues<T> = FormValues(initialValue)
+  private val touched: TouchedValues<T> = TouchedValues()
+  private val values: FormValues<T> = FormValues(initialValue)
+  private var errors: ValidationResult.Invalid<T>? = null
 
-  var errors: ValidationResult.Invalid<T>? = null
-    private set
+  fun <R> getError(property: KProperty1<T, R>): String? {
+    return errors?.get(property)?.firstOrNull()
+  }
+
+  fun <R> getTouched(property: KProperty1<T, R>): Boolean {
+    return touched[property]
+  }
 
   fun <R> setValue(property: KProperty1<T, R>, value: R) {
     touched.markTouched(property.name)
