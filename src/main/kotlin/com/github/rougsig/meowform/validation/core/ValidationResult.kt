@@ -34,12 +34,14 @@ sealed class ValidationResult<T> {
   }
 
   internal fun combineWith(other: ValidationResult<T>): ValidationResult<T> {
-    return if (this is Invalid && other is Invalid) {
-      Invalid((this.errors.toList() + other.errors.toList())
-        .groupBy(keySelector = { it.first }, valueTransform = { it.second })
-        .mapValues { (_, values) -> values.flatten() })
-    } else {
-      other
+    return when (this) {
+      is Valid -> return other
+      is Invalid -> when (other) {
+        is Valid -> this
+        is Invalid -> Invalid((this.errors.toList() + other.errors.toList())
+          .groupBy(keySelector = { it.first }, valueTransform = { it.second })
+          .mapValues { (_, values) -> values.flatten() })
+      }
     }
   }
 
